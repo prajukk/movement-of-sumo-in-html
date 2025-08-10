@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Traffic Management System</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #333;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .traffic-container {
+      position: relative;
+      width: 600px;
+      height: 600px;
+      background-color: #444;
+    }
+
+    .junction {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      background-color: #666;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 50%;
+      border: 2px solid #888;
+    }
+
+    .camera {
+      width: 50px;
+      height: 50px;
+      background-color: #000;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .signal {
+      position: relative;
+      width: 60px;
+      height: 180px;
+      background-color: #222;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      align-items: center;
+      padding: 10px;
+    }
+
+    .signal div {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: gray;
+    }
+
+    .signal .green {
+      background-color: green;
+    }
+
+    .signal .yellow {
+      background-color: yellow;
+    }
+
+    .signal .red {
+      background-color: red;
+    }
+
+    .timer {
+      position: absolute;
+      top: -30px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .road {
+      position: absolute;
+      background-color: #333;
+    }
+
+    .road.horizontal {
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: 100px;
+      transform: translateY(-50%);
+    }
+
+    .road.vertical {
+      left: 50%;
+      top: 0;
+      width: 100px;
+      height: 100%;
+      transform: translateX(-50%);
+    }
+
+    .signal-box {
+      position: absolute;
+    }
+
+    .signal-box.north {
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .signal-box.east {
+      top: 50%;
+      right: 10px;
+      transform: translateY(-50%);
+    }
+
+    .signal-box.south {
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .signal-box.west {
+      top: 50%;
+      left: 10px;
+      transform: translateY(-50%);
+    }
+
+    .vehicle-count {
+      position: absolute;
+      top: 70px;
+      font-size: 14px;
+      color: white;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="traffic-container">
+    <div class="junction">
+      <div class="camera">CAM</div>
+    </div>
+    <div class="road horizontal"></div>
+    <div class="road vertical"></div>
+
+    <div class="signal-box north" id="north-signal">
+      <div class="signal">
+        <div class="red"></div>
+        <div class="yellow"></div>
+        <div class="green"></div>
+      </div>
+      <div class="timer">10</div>
+      <div class="vehicle-count" id="north-vehicle-count">0 vehicles</div>
+    </div>
+
+    <div class="signal-box east" id="east-signal">
+      <div class="signal">
+        <div class="red"></div>
+        <div class="yellow"></div>
+        <div class="green"></div>
+      </div>
+      <div class="timer">10</div>
+      <div class="vehicle-count" id="east-vehicle-count">0 vehicles</div>
+    </div>
+
+    <div class="signal-box south" id="south-signal">
+      <div class="signal">
+        <div class="red"></div>
+        <div class="yellow"></div>
+        <div class="green"></div>
+      </div>
+      <div class="timer">10</div>
+      <div class="vehicle-count" id="south-vehicle-count">0 vehicles</div>
+    </div>
+
+    <div class="signal-box west" id="west-signal">
+      <div class="signal">
+        <div class="red"></div>
+        <div class="yellow"></div>
+        <div class="green"></div>
+      </div>
+      <div class="timer">10</div>
+      <div class="vehicle-count" id="west-vehicle-count">0 vehicles</div>
+    </div>
+  </div>
+
+  <script>
+    const signals = [
+      { id: 'north-signal', current: 'red', timer: 10, vehicles: Math.floor(Math.random() * 10) },
+      { id: 'east-signal', current: 'red', timer: 10, vehicles: Math.floor(Math.random() * 10) },
+      { id: 'south-signal', current: 'green', timer: 10, vehicles: Math.floor(Math.random() * 10) },
+      { id: 'west-signal', current: 'red', timer: 10, vehicles: Math.floor(Math.random() * 10) },
+    ];
+
+    // Update the signal colors and the vehicle count display
+    function updateSignal(signal) {
+      const signalElement = document.getElementById(signal.id);
+      const lights = signalElement.querySelectorAll('.signal div');
+      const timerDisplay = signalElement.querySelector('.timer');
+      const vehicleCountDisplay = signalElement.querySelector('.vehicle-count');
+
+      // Reset signal colors to gray
+      lights.forEach(light => light.style.backgroundColor = 'gray');
+      timerDisplay.textContent = signal.timer;
+      vehicleCountDisplay.textContent = `${signal.vehicles} vehicles`;
+
+      // Update light based on signal's current state
+      if (signal.current === 'red') {
+        lights[0].style.backgroundColor = 'red';
+      } else if (signal.current === 'yellow') {
+        lights[1].style.backgroundColor = 'yellow';
+      } else {
+        lights[2].style.backgroundColor = 'green';
+      }
+    }
+
+    // Change signal state based on vehicle count priority
+    function changeSignal() {
+      const sortedSignals = [...signals].sort((a, b) => b.vehicles - a.vehicles); // Sort by vehicles, descending
+      const highestSignal = sortedSignals[0];
+
+      signals.forEach(signal => {
+        if (signal.id === highestSignal.id) {
+          signal.current = 'green';
+          signal.timer = 10;
+        } else {
+          signal.current = 'red';
+          signal.timer = 7;
+        }
+        updateSignal(signal);
+      });
+    }
+
+    // Countdown and signal change logic
+    function countdown() {
+      const activeSignal = signals.find(signal => signal.current === 'green');
+      activeSignal.timer--;
+
+      if (activeSignal.timer === 0) {
+        changeSignal();
+      } else {
+        updateSignal(activeSignal);
+      }
+    }
+
+    // Update signals every second
+    setInterval(countdown, 1000);
+    setInterval(changeSignal, 3000); // Change signal every 3 seconds
+    signals.forEach(updateSignal);
+
+  </script>
+</body>
+</html>

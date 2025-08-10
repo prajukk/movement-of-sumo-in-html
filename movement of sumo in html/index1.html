@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Traffic Management System</title>
+<style>
+    body {
+        margin: 0;
+        background-color: #333;
+        font-family: Arial, sans-serif;
+      }
+      
+      .traffic-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        padding: 20px;
+      }
+      
+      .junction {
+        position: relative;
+        background-color: #444;
+        width: 300px;
+        height: 300px;
+        border: 5px solid #666;
+        border-radius: 10px;
+      }
+      
+      .signal {
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 50px;
+        height: 150px;
+        background-color: #222;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        align-items: center;
+        padding: 10px;
+        border-radius: 10px;
+      }
+      
+      .signal div {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: gray;
+      }
+      
+      .signal .green {
+        background-color: green;
+      }
+      
+      .signal .red {
+        background-color: red;
+      }
+      
+      .road {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 50%;
+        background-color: #222;
+      }
+      
+      .vehicles {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+      }
+      
+      .vehicle {
+        width: 40px;
+        height: 20px;
+        background-color: blue;
+        border-radius: 5px;
+      }
+      
+      .vehicle.bus {
+        background-color: red;
+        width: 60px;
+      }
+       
+</style>
+</head>
+<body>
+  <div class="traffic-container">
+    <div class="junction" id="junction1">
+      <div class="signal" id="signal1">hlo</div>
+      <div class="road">
+        <div class="vehicles" id="vehicles1">vehicle</div>
+      </div>
+    </div>
+    <div class="junction" id="junction2">
+      <div class="signal" id="signal2"></div>
+      <div class="road">
+        <div class="vehicles" id="vehicles2"></div>
+      </div>
+    </div>
+    <div class="junction" id="junction3">
+      <div class="signal" id="signal3"></div>
+      <div class="road">
+        <div class="vehicles" id="vehicles3"></div>
+      </div>
+    </div>
+    <div class="junction" id="junction4">
+      <div class="signal" id="signal4"></div>
+      <div class="road">
+        <div class="vehicles" id="vehicles4"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Traffic Signal Control Logic
+const junctions = [
+    { id: 1, vehicles: Math.floor(Math.random() * 10) },
+    { id: 2, vehicles: Math.floor(Math.random() * 10) },
+    { id: 3, vehicles: Math.floor(Math.random() * 10) },
+    { id: 4, vehicles: Math.floor(Math.random() * 10) }
+  ];
+  
+  function updateSignals() {
+    const maxTrafficJunction = junctions.reduce((max, junction) =>
+      junction.vehicles > max.vehicles ? junction : max
+    );
+  
+    junctions.forEach(junction => {
+      const signal = document.getElementById(`signal${junction.id}`);
+      signal.innerHTML = `
+        <div class="${junction.id === maxTrafficJunction.id ? 'green' : 'red'}"></div>
+      `;
+    });
+  
+    animateVehicles(maxTrafficJunction.id);
+  }
+  
+  function animateVehicles(activeJunction) {
+    junctions.forEach(junction => {
+      const vehicles = document.getElementById(`vehicles${junction.id}`);
+      vehicles.innerHTML = '';
+      for (let i = 0; i < junction.vehicles; i++) {
+        const vehicle = document.createElement('div');
+        vehicle.className = `vehicle ${i % 3 === 0 ? 'bus' : ''}`;
+        vehicles.appendChild(vehicle);
+      }
+      if (junction.id === activeJunction) {
+        vehicles.style.animation = 'moveVehicles 5s linear infinite';
+      } else {
+        vehicles.style.animation = 'none';
+      }
+    });
+  }
+  
+  // Initialize and Update Every 5 Seconds
+  updateSignals();
+  setInterval(() => {
+    junctions.forEach(j => (j.vehicles = Math.floor(Math.random() * 10)));
+    updateSignals();
+  }, 5000);
+  
+  </script>
+</body>
+</html>
